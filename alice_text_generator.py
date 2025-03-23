@@ -37,22 +37,26 @@ def split_train_labels(sequence):
 
 
 class CharGenModel(tf.keras.Model):
-
-    def __init__(self, vocab_size, num_timesteps, 
-            embedding_dim, **kwargs):
+    def __init__(self, vocab_size, sequence_length, embedding_dim, **kwargs):
         super(CharGenModel, self).__init__(**kwargs)
-        self.embedding_layer = tf.keras.layers.Embedding(
-            vocab_size,
-            embedding_dim
-        )
-        self.rnn_layer = tf.keras.layers.GRU(
-            num_timesteps,
+        # Convert integer-encoded characters into dense embeddings.
+        self.embedding = tf.keras.layers.Embedding(input_dim=vocab_size, output_dim=embedding_dim)
+        # GRU layer that retains state between batches for sequence continuity.
+        self.gru = tf.keras.layers.GRU(
+            units=sequence_length,
             recurrent_initializer="glorot_uniform",
             recurrent_activation="sigmoid",
             stateful=True,
             return_sequences=True
         )
-        self.dense_layer = tf.keras.layers.Dense(vocab_size)
+        # Fully connected layer to project GRU outputs to vocabulary size.
+        self.dense = tf.keras.layers.Dense(units=vocab_size)
+
+    def call(self, inputs):
+        x = self.embedding(inputs)
+        x = self.gru(x)
+        return self.dense(x)
+
 
     def call(self, x):
         x = self.embedding_layer(x)
