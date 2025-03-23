@@ -69,22 +69,31 @@ def loss(labels, predictions):
     )
 
 
-def generate_text(model, prefix_string, char2idx, idx2char,
-        num_chars_to_generate=1000, temperature=1.0):
-    input = [char2idx[s] for s in prefix_string]
-    input = tf.expand_dims(input, 0)
-    text_generated = []
-    model.reset_states()
-    for i in range(num_chars_to_generate):
-        preds = model(input)
-        preds = tf.squeeze(preds, 0) / temperature
-        # predict char returned by model
-        pred_id = tf.random.categorical(preds, num_samples=1)[-1, 0].numpy()
-        text_generated.append(idx2char[pred_id])
-        # pass the prediction as the next input to the model
-        input = tf.expand_dims([pred_id], 0)
+def generate_text(model, start_string, char_to_index, index_to_char,
+                  gen_length=1000, temperature=1.0):
+    # Convert the starting string to a list of indices
+    input_indices = [char_to_index[char] for char in start_string]
+    # Create a batch of one sequence
+    input_tensor = tf.expand_dims(input_indices, 0)
 
-    return prefix_string + "".join(text_generated)
+    generated_text = []
+    # Reset the model's state before generation
+    model.reset_states()
+
+    for _ in range(gen_length):
+        # Get the model's predictions
+        predictions = model(input_tensor)
+        # Remove the batch dimension and adjust by the temperature
+        predictions = tf.squeeze(predictions, axis=0) / temperature
+        # Sample an index from the predictions
+        sampled_index = tf.random.categorical(predictions, num_samples=1)[-1, 0].numpy()
+        # Append the corresponding character to the generated text list
+        generated_text.append(index_to_char[sampled_index])
+        # Use the sampled index as the next input to the model
+        input_tensor = tf.expand_dims([sampled_index], 0)
+
+    # Combine the start string with the generated characters
+    return start_string + "".join(generated_text)
 
 
 # download and read into local data structure (list of chars)
