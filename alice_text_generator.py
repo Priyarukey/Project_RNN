@@ -180,3 +180,4 @@ for i in range(num_epochs // 10):
     print("after epoch: {:d}".format(i+1)*10)
     print(generate_text(gen_model, "Alice ", char2idx, idx2char))
     print("---")
+    
