@@ -65,12 +65,12 @@ class CharGenModel(tf.keras.Model):
         return x
 
 
-def loss(labels, predictions):
-    return tf.losses.sparse_categorical_crossentropy(
-        labels,
-        predictions,
-        from_logits=True
-    )
+def loss_fn(labels, predictions):
+    # Compute the sparse categorical crossentropy loss.
+    # 'from_logits=True' indicates that 'predictions' are raw scores (logits)
+    # and a softmax will be applied internally.
+    return tf.losses.sparse_categorical_crossentropy(labels, predictions, from_logits=True)
+
 
 
 def generate_text(model, start_string, char_to_index, index_to_char,
