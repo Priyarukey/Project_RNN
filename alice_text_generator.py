@@ -43,12 +43,12 @@ class CharGenModel(tf.keras.Model):
         self.embedding = tf.keras.layers.Embedding(input_dim=vocab_size, output_dim=embedding_dim)
         # GRU layer that retains state between batches for sequence continuity.
         self.gru = tf.keras.layers.GRU(
-            units=sequence_length,
-            recurrent_initializer="glorot_uniform",
-            recurrent_activation="sigmoid",
-            stateful=True,
-            return_sequences=True
-        )
+    units=sequence_length,
+    recurrent_initializer="glorot_uniform",  # Initializes the recurrent weights using Glorot uniform.
+    recurrent_activation="sigmoid",            # Applies the sigmoid function to the recurrent connections.
+    stateful=True,
+    return_sequences=True
+)
         # Fully connected layer to project GRU outputs to vocabulary size.
         self.dense = tf.keras.layers.Dense(units=vocab_size)
 
